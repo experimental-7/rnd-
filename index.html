@@ -17,32 +17,30 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--background-light) 0%, #e0e5eb 100%);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-            box-sizing: border-box; /* Include padding in element's total width and height */
-        }
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--background-light) 0%, #e0e5eb 100%);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 20px;
+    box-sizing: border-box;
+    display: block; /* Remove flex centering */
+}
 
-        .container {
-            background-color: var(--card-background);
-            border-radius: var(--border-radius);
-            box-shadow: 0 10px 30px var(--shadow-light);
-            padding: 40px;
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-            box-sizing: border-box;
-            transform: translateY(0);
-            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
-        }
-
+.container {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 30px var(--shadow-light);
+    padding: 40px;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    box-sizing: border-box;
+    transform: translateY(0);
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+    margin: 40px auto 0 auto; /* Add this line to center at top */
+}
         .container:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
