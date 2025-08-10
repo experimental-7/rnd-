@@ -1,125 +1,84 @@
-<script>
-  // Draw ball
-  function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-    ctx.closePath();
-  }
+// Wait until the document is fully loaded before running the script
+document.addEventListener("DOMContentLoaded", () => {
 
-  // Draw paddle
-  function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-    ctx.closePath();
-  }
+    // --- Get references to HTML elements ---
+    const archiveForm = document.getElementById("archive-form");
+    const urlInput = document.getElementById("urlInput");
+    const historyTableBody = document.querySelector("#history-table tbody");
+    const historyContainer = document.getElementById("history-container");
 
-  // Draw bricks
-  function drawBricks() {
-    for (let i = 0; i < brick.rows; i++) {
-      for (let j = 0; j < brick.cols; j++) {
-        if (bricks[i][j].status === 1) {
-          const brickX = j * (brick.width + brick.padding) + brick.offsetX;
-          const brickY = i * (brick.height + brick.padding) + brick.offsetY;
-          bricks[i][j].x = brickX;
-          bricks[i][j].y = brickY;
-          ctx.beginPath();
-          ctx.rect(brickX, brickY, brick.width, brick.height);
-          ctx.fillStyle = '#fff';
-          ctx.fill();
-          ctx.closePath();
+    // --- Load history from local storage ---
+    // It retrieves the stored history or creates an empty array if none exists
+    let urlHistory = JSON.parse(localStorage.getItem("urlHistory")) || [];
+
+    // --- Function to render (display) the history table ---
+    const renderHistory = () => {
+        // Clear the existing table rows
+        historyTableBody.innerHTML = "";
+
+        // Hide history container if there are no entries
+        if (urlHistory.length === 0) {
+            historyContainer.style.display = "none";
+            return;
         }
-      }
-    }
-  }
 
-  // Ball collision detection
-  function collisionDetection() {
-    for (let i = 0; i < brick.rows; i++) {
-      for (let j = 0; j < brick.cols; j++) {
-        const b = bricks[i][j];
-        if (b.status === 1 && ball.x > b.x && ball.x < b.x + brick.width && ball.y > b.y && ball.y < b.y + brick.height) {
-          ball.dy = -ball.dy;
-          b.status = 0;
+        // Show the container if there is history
+        historyContainer.style.display = "block";
+
+        // Create a new row for each entry in the history
+        urlHistory.forEach(entry => {
+            const row = document.createElement("tr");
+
+            // Cell for the URL
+            const urlCell = document.createElement("td");
+            urlCell.textContent = entry.url;
+            row.appendChild(urlCell);
+
+            // Cell for the date
+            const dateCell = document.createElement("td");
+            dateCell.textContent = entry.date;
+            row.appendChild(dateCell);
+            
+            historyTableBody.appendChild(row);
+        });
+    };
+
+    // --- Event listener for the form submission ---
+    archiveForm.addEventListener("submit", (event) => {
+        // Prevent the form from reloading the page
+        event.preventDefault(); 
+        
+        const urlToPass = urlInput.value.trim();
+
+        if (urlToPass) {
+            // --- 1. Open the archive website ---
+            const targetWebsiteBaseUrl = 'https://archive.is/submit/';
+            const finalUrl = `${targetWebsiteBaseUrl}?url=${encodeURIComponent(urlToPass)}`;
+            window.open(finalUrl, '_blank');
+
+            // --- 2. Update the history ---
+            const newEntry = {
+                url: urlToPass,
+                date: new Date().toLocaleDateString() // e.g., "8/10/2025"
+            };
+            
+            // Add the new URL to the beginning of the history array
+            urlHistory.unshift(newEntry);
+
+            // Optional: Limit the history to the last 20 entries
+            if (urlHistory.length > 20) {
+                urlHistory.pop();
+            }
+
+            // --- 3. Save updated history to local storage ---
+            localStorage.setItem("urlHistory", JSON.stringify(urlHistory));
+
+            // --- 4. Re-render the history table and clear input ---
+            renderHistory();
+            urlInput.value = ""; 
         }
-      }
-    }
-  }
+    });
 
-  // Move ball
-  function moveBall() {
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-
-    // Wall collision
-    if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) ball.dx = -ball.dx;
-    if (ball.y + ball.dy < ball.radius) ball.dy = -ball.dy;
-
-    // Paddle collision
-    if (ball.y + ball.dy > canvas.height - ball.radius) {
-      if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) ball.dy = -ball.dy;
-      else gameOver();
-    }
-  }
-
-  // Game over
-  function gameOver() {
-    alert('Game Over!');
-    document.location.reload();
-  }
-
-  // Paddle movement
-  document.addEventListener('touchmove', (e) => {
-    const touchX = e.touches[0].clientX;
-    paddle.x = touchX - paddle.width / 2;
-    if (paddle.x < 0) paddle.x = 0;
-    if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
-  });
-
-  // Render game
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBall();
-    drawPaddle();
-    drawBricks();
-    moveBall();
-    collisionDetection();
-    requestAnimationFrame(draw);
-  }
-
-  draw();
-  
-  let score = 0;
-
-  // Update score
-  function updateScore() {
-    score++;
-    if (score === brick.rows * brick.cols) {
-      alert('You Win!');
-      document.location.reload();
-    }
-  }
-
-  // Modify collision detection to update score
-  function collisionDetection() {
-    for (let i = 0; i < brick.rows; i++) {
-      for (let j = 0; j < brick.cols; j++) {
-        const b = bricks[i][j];
-        if (b.status === 1 && ball.x > b.x && ball.x < b.x + brick.width && ball.y > b.y && ball.y < b.y + brick.height) {
-          ball.dy = -ball.dy;
-          b.status = 0;
-          updateScore();
-        }
-      }
-    }
-  }
-
-  // Ensure canvas resizes on window resize
-  window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  });
-</script>
+    // --- Initial call to display history when the page first loads ---
+    renderHistory();
+});
