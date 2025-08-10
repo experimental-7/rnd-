@@ -5,179 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archive in One - Web 3.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #6a82fb; /* A nice blue-purple */
-            --secondary-color: #fc5c7d; /* A complementary pink */
-            --text-color: #333;
-            --background-light: #f0f2f5;
-            --card-background: #ffffff;
-            --shadow-light: rgba(0, 0, 0, 0.08);
-            --border-radius: 12px;
-        }
-
-        body {
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
-    min-height: 100vh;
-    background: linear-gradient(135deg, var(--background-light) 0%, #e0e5eb 100%);
-    color: var(--text-color);
-    line-height: 1.6;
-    padding: 20px;
-    box-sizing: border-box;
-    display: block; /* Remove flex centering */
-}
-
-.container {
-    background-color: var(--card-background);
-    border-radius: var(--border-radius);
-    box-shadow: 0 10px 30px var(--shadow-light);
-    padding: 40px;
-    width: 100%;
-    max-width: 600px;
-    text-align: center;
-    box-sizing: border-box;
-    transform: translateY(0);
-    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
-    margin: 40px auto 0 auto; /* Add this line to center at top */
-}
-        .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-        }
-
-        h1 {
-            font-size: 2.5em;
-            color: var(--primary-color);
-            margin-bottom: 25px;
-            font-weight: 600;
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block; /* Essential for text gradient */
-        }
-
-        label {
-            font-size: 1.1em;
-            margin-bottom: 15px;
-            font-weight: 400;
-            text-align: left;
-            display: block; /* Ensures label takes full width */
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        input[type="text"] {
-            width: calc(100% - 20px); /* Account for padding */
-            padding: 15px 10px;
-            margin-bottom: 25px;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            font-size: 1em;
-            color: var(--text-color);
-            outline: none;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            box-sizing: border-box; /* Include padding in the width calculation */
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(106, 130, 251, 0.2);
-        }
-
-        button {
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-            box-shadow: 0 8px 20px rgba(106, 130, 251, 0.3);
-            letter-spacing: 0.5px;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(106, 130, 251, 0.4);
-            opacity: 0.95;
-        }
-
-        button:active {
-            transform: translateY(0);
-            box-shadow: 0 5px 15px rgba(106, 130, 251, 0.3);
-        }
-
-        .note {
-            margin-top: 30px;
-            font-size: 0.9em;
-            color: #777;
-            background-color: #f8f8f8;
-            border-left: 4px solid var(--primary-color);
-            padding: 15px 20px;
-            border-radius: var(--border-radius);
-            text-align: left;
-        }
-
-        .note strong {
-            color: var(--primary-color);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px;
-                margin: 20px;
-            }
-
-            h1 {
-                font-size: 2em;
-            }
-
-            input[type="text"] {
-                width: calc(100% - 20px);
-            }
-
-            button {
-                width: 100%;
-                padding: 12px 20px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
         <h1>Archive in One</h1>
-
-        <label for="urlInput">Enter the URL you wish to archive:</label>
-        <input type="text" id="urlInput" placeholder="e.g., https://yourwebsite.com/page-to-archive">
-
-        <button onclick="openExternalWebsite()">Archive URL</button>
+        
+        <form id="archive-form">
+            <label for="urlInput">Enter the URL you wish to archive:</label>
+            <input type="text" id="urlInput" placeholder="e.g., https://yourwebsite.com/page-to-archive" required>
+            <button type="submit">Archive URL</button>
+        </form>
 
         <p class="note">
             <strong>Heads Up:</strong> This tool redirects you to Archive.is and attempts to pre-fill the URL.
         </p>
     </div>
 
-    <script>
-        function openExternalWebsite() {
-            const urlToPass = document.getElementById('urlInput').value.trim(); // .trim() removes leading/trailing whitespace
+    <div class="container" id="history-container">
+        <h2>History</h2>
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>Previously Entered URLs</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
 
-            if (urlToPass) {
-                // Corrected target URL for Archive.is submission
-                const targetWebsiteBaseUrl = 'https://archive.is/submit/';
-                const queryParameterName = 'url'; // Archive.is uses 'url' as its query parameter
-
-                const finalUrl = `${targetWebsiteBaseUrl}?${queryParameterName}=${encodeURIComponent(urlToPass)}`;
-                window.open(finalUrl, '_blank'); // Opens in a new tab
-            } else {
-                alert('Please enter a URL to archive!');
-            }
-        }
-    </script>
+    <script src="script.js" defer></script>
 
 </body>
 </html>
