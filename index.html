@@ -22,6 +22,22 @@
             <strong>Heads Up:</strong> This tool redirects you to Archive.is and attempts to pre-fill the URL.
         </p>
     </div>
+<script>
+        function openExternalWebsite() {
+            const urlToPass = document.getElementById('urlInput').value.trim(); // .trim() removes leading/trailing whitespace
+
+            if (urlToPass) {
+                // Corrected target URL for Archive.is submission
+                const targetWebsiteBaseUrl = 'https://archive.is/submit/';
+                const queryParameterName = 'url'; // Archive.is uses 'url' as its query parameter
+
+                const finalUrl = `${targetWebsiteBaseUrl}?${queryParameterName}=${encodeURIComponent(urlToPass)}`;
+                window.open(finalUrl, '_blank'); // Opens in a new tab
+            } else {
+                alert('Please enter a URL to archive!');
+            }
+        }
+    </script>
 
     <div class="container" id="history-container">
         <h2>History</h2>
