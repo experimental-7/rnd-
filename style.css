@@ -1,26 +1,40 @@
+/**
+ * File: style.css
+ * Description: This file contains all the styles for the "Archive in One" web application.
+ * It uses CSS variables for a consistent color scheme and layout, and includes
+ * responsive design adjustments for mobile devices.
+ */
 
+/*
+  :root pseudo-class defines CSS variables for global use.
+  This makes it easy to maintain a consistent theme and make quick changes.
+*/
 :root {
-    --primary-color: #6a82fb; /* A nice blue-purple */
-    --secondary-color: #fc5c7d; /* A complementary pink */
-    --text-color: #333;
-    --background-light: #f0f2f5;
-    --card-background: #ffffff;
-    --shadow-light: rgba(0, 0, 0, 0.08);
-    --border-radius: 12px;
+    --primary-color: #6a82fb;   /* A friendly and modern blue-purple */
+    --secondary-color: #fc5c7d; /* A vibrant, complementary pink */
+    --text-color: #333;         /* Standard dark grey for readability */
+    --background-light: #f0f2f5;/* A very light grey for the body background */
+    --card-background: #ffffff; /* White for card elements */
+    --shadow-light: rgba(0, 0, 0, 0.08); /* A subtle shadow */
+    --border-radius: 12px;      /* Rounded corners for a softer look */
 }
 
+/* --- General Body and Layout Styles --- */
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', sans-serif; /* Modern, readable font from Google Fonts */
     margin: 0;
     min-height: 100vh;
     background: linear-gradient(135deg, var(--background-light) 0%, #e0e5eb 100%);
     color: var(--text-color);
     line-height: 1.6;
     padding: 20px;
-    box-sizing: border-box;
-    display: block;
+    box-sizing: border-box; /* Ensures padding is included in the element's total width and height */
 }
 
+/*
+  The main container for the application content.
+  It's centered and has a card-like appearance.
+*/
 .container {
     background-color: var(--card-background);
     border-radius: var(--border-radius);
@@ -30,37 +44,37 @@ body {
     max-width: 600px;
     text-align: center;
     box-sizing: border-box;
-    transform: translateY(0);
+    margin: 40px auto 0 auto; /* Centers the container horizontally and adds top margin */
     transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
-    margin: 40px auto 0 auto;
 }
 
+/* A subtle lift effect on hover to provide user feedback. */
 .container:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
 }
 
+/* --- Typography --- */
 h1 {
     font-size: 2.5em;
-    color: var(--primary-color);
     margin-bottom: 25px;
     font-weight: 600;
+    /* A gradient text effect for a modern look */
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    display: inline-block;
+    display: inline-block; /* Required for the background-clip to work correctly */
 }
 
 label {
     font-size: 1.1em;
     margin-bottom: 15px;
     font-weight: 400;
-    text-align: left;
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
+    text-align: left; /* Aligns the label text to the left */
+    display: block;   /* Ensures the label takes up the full width */
 }
 
+/* --- Form Elements --- */
 input[type="text"] {
     width: 100%; 
     padding: 15px;
@@ -69,11 +83,12 @@ input[type="text"] {
     border-radius: var(--border-radius);
     font-size: 1em;
     color: var(--text-color);
-    outline: none;
+    outline: none; /* Removes the default browser outline on focus */
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     box-sizing: border-box;
 }
 
+/* Highlight effect when the input is focused */
 input[type="text"]:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(106, 130, 251, 0.2);
@@ -91,7 +106,7 @@ button {
     transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
     box-shadow: 0 8px 20px rgba(106, 130, 251, 0.3);
     letter-spacing: 0.5px;
-    width: 100%; /* Make button full width to match input */
+    width: 100%; /* Makes the button take the full width of its container */
 }
 
 button:hover {
@@ -105,6 +120,7 @@ button:active {
     box-shadow: 0 5px 15px rgba(106, 130, 251, 0.3);
 }
 
+/* --- Note Box --- */
 .note {
     margin-top: 30px;
     font-size: 0.9em;
@@ -120,33 +136,16 @@ button:active {
     color: var(--primary-color);
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .container {
-        padding: 30px;
-        margin: 20px auto 0 auto; /* Adjusted for mobile */
-    }
-
-    h1 {
-        font-size: 2em;
-    }
-
-    button {
-        padding: 12px 20px;
-    }
-}
-
-/* --- NEW HISTORY TABLE STYLES --- */
-
+/* --- History Table Styles --- */
 #history-container {
-    padding: 30px; /* A little less padding for history */
+    padding: 30px; /* Provides spacing inside the history container */
 }
 
 #history-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: collapse; /* Merges adjacent borders into a single border */
     margin-top: 20px;
-    table-layout: fixed; /* Ensures columns are of equal width */
+    table-layout: fixed;   /* Prevents the table from resizing based on content */
 }
 
 #history-table th, 
@@ -154,18 +153,37 @@ button:active {
     border: 1px solid #ddd;
     padding: 12px 15px;
     text-align: left;
-    word-wrap: break-word; /* Prevents long URLs from breaking layout */
+    word-wrap: break-word; /* Allows long URLs to wrap to the next line */
 }
 
 #history-table th {
-    background-color: #f8f8f8;
+    background-color: #f8f8f8; /* Light grey background for table headers */
     font-weight: 600;
 }
 
+/* Zebra-striping for better readability of table rows */
 #history-table tbody tr:nth-child(even) {
     background-color: #fdfdfd;
 }
 
+/* Highlight row on hover */
 #history-table tbody tr:hover {
     background-color: #f1f1f1;
+}
+
+/* --- Responsive Adjustments --- */
+/* Media query for screens smaller than 768px (like tablets and phones) */
+@media (max-width: 768px) {
+    .container {
+        padding: 30px;
+        margin: 20px auto 0 auto; /* Adjust margin for smaller screens */
+    }
+
+    h1 {
+        font-size: 2em; /* Reduce heading size on smaller screens */
+    }
+
+    button {
+        padding: 12px 20px;
+    }
 }
