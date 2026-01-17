@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABYSS LINK - Deep Sea Survival</title>
+    <style>
+        :root {
+            --bg-color: #050a14;
+            --chat-bg: #0f172a;
+            --marin-bubble: #1e293b;
+            --player-bubble: #0891b2;
+            --text-color: #e2e8f0;
+            --accent: #22d3ee;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--chat-bg);
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #334155;
+            border-right: 1px solid #334155;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        /* Header */
+        header {
+            padding: 15px;
+            background-color: #020617;
+            border-bottom: 2px solid var(--accent);
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-shadow: 0 0 5px var(--accent);
+        }
+
+        .status-light {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ef4444; /* Red for danger */
+            box-shadow: 0 0 5px #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        /* Chat Log */
+        #chat-log {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        /* Messages */
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            line-height: 1.4;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+            position: relative;
+        }
+
+        .marin {
+            align-self: flex-start;
+            background-color: var(--marin-bubble);
+            border-bottom-left-radius: 2px;
+            color: #94a3b8;
+        }
+
+        .player {
+            align-self: flex-end;
+            background-color: var(--player-bubble);
+            border-bottom-right-radius: 2px;
+            color: #fff;
+            text-align: right;
+        }
+
+        .system {
+            align-self: center;
+            background: transparent;
+            color: var(--accent);
+            font-size: 0.8rem;
+            border: 1px solid var(--accent);
+            padding: 5px 10px;
+            text-transform: uppercase;
+        }
+
+        /* Choice Area */
+        #input-area {
+            padding: 20px;
+            background-color: #020617;
+            border-top: 1px solid #334155;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .choice-btn {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 12px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .choice-btn:hover {
+            background-color: var(--accent);
+            color: #000;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .choice-btn:disabled {
+            border-color: #475569;
+            color: #475569;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-left: 10px;
+            margin-bottom: 5px;
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <header>
+        <div class="status-light" id="status-light"></div>
+        <h1>ABYSS LINK // v1.0</h1>
+        <div style="font-size: 0.8rem">DEPTH: 10,900m</div>
+    </header>
+
+    <div id="chat-log">
+        </div>
+    
+    <div class="typing-indicator" id="typing">Marin is typing...</div>
+
+    <div id="input-area">
+        </div>
+</div>
+
+<script>
+    const chatLog = document.getElementById('chat-log');
+    const inputArea = document.getElementById('input-area');
+    const typingIndicator = document.getElementById('typing');
+    const statusLight = document.getElementById('status-light');
+
+    // --- Sound Effects (Simulated via simple beeps logic visually for now) ---
+    
+    // --- Story Data ---
+    const story = {
+        start: {
+            text: ["...Hello?", "Is anyone receiving this?", "This is Unit 04. I've hit the bottom. The impact was... violent."],
+            next: 'choices_1'
+        },
+        choices_1: {
+            options: [
+                { text: "I read you, Unit 04. Report status.", next: 'report_status' },
+                { text: "Marin? Are you injured?", next: 'check_injury' }
+            ]
+        },
+        report_status: {
+            text: ["Surface Control? Thank god.", "Systems are screaming at me. Hull integrity is at 68%. External lights are flickering."],
+            next: 'common_path_1'
+        },
+        check_injury: {
+            text: ["Yeah... yeah, it's Marin. My head is spinning, bleeding a bit.", "But the sub took the worst of it. Hull integrity dropped to 68%."],
+            next: 'common_path_1'
+        },
+        common_path_1: {
+            text: ["I'm hearing a creaking sound. It's loud.", "I need to stabilize the pressure, but the manual valve is stuck."],
+            next: 'valve_choice'
+        },
+        valve_choice: {
+            options: [
+                { text: "Force the valve. We need pressure stable NOW.", next: 'force_valve' },
+                { text: "Don't force it. Try the electronic bypass.", next: 'electronic_bypass' }
+            ]
+        },
+        force_valve: {
+            text: ["Okay... grabbing the wrench.", "Hnnngh...", "CRACK.", "Oh no."],
+            next: 'bad_ending_1'
+        },
+        bad_ending_1: {
+            text: ["The handle snapped off. The creaking is getting louder.", "Water is spraying in. High pressure water. It cuts like a laser.", "Marin out."],
+            type: 'system',
+            content: "CONNECTION LOST - SIGNAL TERMINATED",
+            end: true
+        },
+        electronic_bypass: {
+            text: ["Okay, trying the terminal...", "Come on...", "It worked! Pressure is equalizing. The creaking stopped."],
+            next: 'oxygen_issue'
+        },
+        oxygen_issue: {
+            text: ["That bought me some time.", "But Surface, look at the O2 scrubbers. They're offline from the crash.", "I have about 10 minutes of air if I don't fix them."],
+            next: 'fix_o2'
+        },
+        fix_o2: {
+            options: [
+                { text: "Check the fuse box first.", next: 'fuse_box' },
+                { text: "Hit the reboot sequence on the main computer.", next: 'reboot' }
+            ]
+        },
+        reboot: {
+            text: ["Rebooting...", "System restarting.", "Scrubbers are... online! Efficiently is low, but I can breathe."],
+            next: 'monster_intro'
+        },
+        fuse_box: {
+            text: ["Opening the panel...", "Sparks! Damn it!", "I blew the backup circuit. I'm losing power fast."],
+            next: 'bad_ending_2'
+        },
+        bad_ending_2: {
+            text: ["It's getting cold. And dark.", "I can see something glowing outside the viewport. It's coming closer.", "It's beautiful...", "...."],
+            type: 'system',
+            content: "LIFE SIGNS CRITICAL - 0 BPM",
+            end: true
+        },
+        monster_intro: {
+            text: ["Wait. Something just moved past the viewport.", "Something big.", "It didn't look like a fish. It had... too many limbs."],
+            next: 'final_choice'
+        },
+        final_choice: {
+            options: [
+                { text: "Turn off all external lights! Hide!", next: 'hide' },
+                { text: "Flash the lights! Scare it off!", next: 'scare' }
+            ]
+        },
+        scare: {
+            text: ["Flashing high beams!", "IT DIDN'T LIKE THAT.", "It's charging the glass!"],
+            next: 'bad_ending_1'
+        },
+        hide: {
+            text: ["Killing the lights. Going silent.", "...", "...", "I can hear it scraping the hull...", "It's moving away.", "I think I'm safe for now. Waiting for rescue protocol."],
+            type: 'system',
+            content: "MISSION UPDATE: RESCUE SUB DEPLOYED. EST 4 HOURS.",
+            end: true
+        }
+    };
+
+    // --- Game Logic ---
+
+    function addMessage(text, type = 'marin') {
+        const div = document.createElement('div');
+        div.classList.add('message', type);
+        div.innerText = text;
+        chatLog.appendChild(div);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function showChoices(options) {
+        inputArea.innerHTML = ''; // Clear old buttons
+        options.forEach(option => {
+            const btn = document.createElement('button');
+            btn.classList.add('choice-btn');
+            btn.innerText = option.text;
+            btn.onclick = () => handleChoice(option, btn.innerText);
+            inputArea.appendChild(btn);
+        });
+    }
+
+    function handleChoice(option, text) {
+        // Remove buttons
+        inputArea.innerHTML = '';
+        
+        // Show player choice in chat
+        addMessage(text, 'player');
+
+        // Trigger next story beat with delay
+        setTimeout(() => {
+            processNode(option.next);
+        }, 1000);
+    }
+
+    function processNode(nodeId) {
+        const node = story[nodeId];
+        
+        if (!node) return;
+
+        // If it's a system message ending
+        if (node.type === 'system') {
+             // Show Marin's final words first if they exist
+             if (node.text) {
+                let delay = 0;
+                node.text.forEach((msg, index) => {
+                    setTimeout(() => {
+                        addMessage(msg, 'marin');
+                        if (index === node.text.length - 1) {
+                            setTimeout(() => {
+                                addMessage(node.content, 'system');
+                                statusLight.style.backgroundColor = node.end && !node.content.includes("RESCUE") ? '#000' : '#22c55e';
+                                statusLight.style.animation = 'none';
+                            }, 2000);
+                        }
+                    }, delay);
+                    delay += 1500 + (msg.length * 20); 
+                });
+             }
+             return;
+        }
+
+        // Process Marin's messages
+        if (node.text) {
+            let delay = 0;
+            typingIndicator.style.display = 'block';
+
+            node.text.forEach((msg, index) => {
+                // Calculate reading time based on length
+                const readTime = 1000 + (msg.length * 30);
+                
+                setTimeout(() => {
+                    // If it's the last message, hide typing, show choices
+                    if (index === node.text.length - 1) {
+                        typingIndicator.style.display = 'none';
+                        if (node.next && story[node.next].options) {
+                            showChoices(story[node.next].options);
+                        } else if (node.next) {
+                            // If next node is just more text without choices (automatic chaining)
+                            setTimeout(() => processNode(node.next), 1000);
+                        }
+                    }
+                    addMessage(msg, 'marin');
+                }, delay + 1500); // Initial delay to "think"
+
+                delay += readTime;
+            });
+        }
+    }
+
+    // Start the game
+    setTimeout(() => {
+        addMessage("INCOMING TRANSMISSION...", 'system');
+        setTimeout(() => {
+            processNode('start');
+        }, 1500);
+    }, 1000);
+
+</script>
+
+</body>
+</html>
