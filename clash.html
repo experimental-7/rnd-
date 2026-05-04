@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoC Chat Color Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e24;
+            color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #2b2b36;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #f5f5f5;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: #3f3f4e;
+            color: white;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        input[type="text"]:focus {
+            outline: 2px solid #4CAF50;
+        }
+        input[type="color"] {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 6px;
+            background-color: transparent;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .output-box {
+            background-color: #1a1a20;
+            padding: 15px;
+            border-radius: 6px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+            text-align: center;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>CoC Color Generator</h2>
+    
+    <label for="chatText">Chat Message:</label>
+    <input type="text" id="chatText" placeholder="Enter your text here..." value="Hello Clan!">
+
+    <label for="chatColor">Select Color:</label>
+    <input type="color" id="chatColor" value="#ff0000">
+
+    <label>Generated Code:</label>
+    <div class="output-box" id="outputCode">&lt;cff0000&gt;Hello Clan!&lt;/c&gt;</div>
+
+    <button onclick="copyCode()" id="copyBtn">Copy to Clipboard</button>
+</div>
+
+<script>
+    const chatText = document.getElementById('chatText');
+    const chatColor = document.getElementById('chatColor');
+    const outputCode = document.getElementById('outputCode');
+    const copyBtn = document.getElementById('copyBtn');
+
+    function updateOutput() {
+        // Fallback to "text" if the input field is empty
+        const text = chatText.value || "text";
+        
+        // Grab the hex color from the picker and strip out the "#"
+        const hex = chatColor.value.replace('#', '');
+        
+        // Assemble the final string in the Clash of Clans format
+        const result = `<c${hex}>${text}</c>`;
+        
+        // Display the result
+        outputCode.innerText = result;
+    }
+
+    function copyCode() {
+        const textToCopy = outputCode.innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            // Provide visual feedback that the copy was successful
+            copyBtn.innerText = "Copied!";
+            copyBtn.style.backgroundColor = "#2e7d32";
+            
+            // Reset the button after 2 seconds
+            setTimeout(() => {
+                copyBtn.innerText = "Copy to Clipboard";
+                copyBtn.style.backgroundColor = "#4CAF50";
+            }, 2000);
+        });
+    }
+
+    // Listen for keystrokes and color changes to update the code in real time
+    chatText.addEventListener('input', updateOutput);
+    chatColor.addEventListener('input', updateOutput);
+    
+    // Run once on page load to initialize the default text
+    updateOutput();
+</script>
+
+</body>
+</html>
