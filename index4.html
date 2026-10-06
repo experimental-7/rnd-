@@ -2,114 +2,179 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#111111">
-    <title>Departures</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Transit Departures</title>
     <style>
-        body, html {
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --accent-train: #ff5722;
+            --accent-bus: #00bcd4;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
-            padding: 0;
-            /* Use dvh to prevent Android address bar from clipping the bottom iframe */
-            height: 100dvh; 
-            overflow: hidden;
-            font-family: sans-serif;
-            background-color: #111; 
+            padding: 20px;
+            display: flex;
+            justify-content: center;
         }
-
-        /* Mobile-First Grid Layout */
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            grid-template-rows: 60px 40px 1fr 40px 1fr;
-            height: 100%;
+        .dashboard {
             width: 100%;
+            max-width: 800px;
         }
-
-        .top-bar {
-            background-color: #0a0a0a;
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 15px;
-            border-bottom: 2px solid #333;
-            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
         }
-
-        .board-title {
-            color: #ffcc00;
-            font-size: 1.3rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 0 0 5px #ffcc00;
-        }
-
-        .clock {
-            color: #ff3333;
+        h1 {
+            margin: 0;
             font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 8px #ff3333;
         }
-
-        .header {
-            display: flex;
+        .time {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+        .board {
+            background-color: var(--panel-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .board h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .train-title { color: var(--accent-train); }
+        .bus-title { color: var(--accent-bus); }
+        
+        .departure-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px;
+            padding: 12px 0;
+            border-bottom: 1px solid #2a2a2a;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
-            z-index: 10;
         }
-
-        .bus-header { background-color: #005eb8; }
-        .train-header { background-color: #1e467d; }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background-color: white;
+        .departure-item:last-child {
+            border-bottom: none;
+        }
+        .dep-time {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .dep-destination {
+            font-size: 1.1rem;
+        }
+        .dep-status {
+            text-align: right;
+            font-weight: bold;
+        }
+        .status-on-time { color: #4caf50; }
+        .status-delayed { color: #f44336; }
+        .status-expected { color: #ffeb3b; }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        
-        <div class="top-bar">
-            <div class="board-title">Departures</div>
-            <div class="clock" id="live-clock">00:00:00</div>
-        </div>
+<div class="dashboard">
+    <header>
+        <h1>Port Glasgow Transit</h1>
+        <div class="time" id="clock">00:00:00</div>
+    </header>
 
-        <div class="header bus-header">McGill's 532 (Live Map)</div>
-        <div id="bus-frame">
-            <iframe src="https://bustimes.org/services/532-greenock-devol-via-gallagher-retail-park-por-2#map" title="Bus Map"></iframe>
-        </div>
-
-        <div class="header train-header">Trains to Glasgow</div>
-        <div id="train-frame">
-            <iframe src="https://www.realtimetrains.co.uk/search/detailed/gb-nr:PTG/to/gb-nr:GLC" title="Train Times"></iframe>
-        </div>
-
+    <div class="board" id="train-board">
+        <h2 class="train-title">🚆 Live Trains (Port Glasgow Station)</h2>
+        <div id="train-list" class="loading">Loading departures...</div>
     </div>
 
-    <script>
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-GB', { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
-            });
-            document.getElementById('live-clock').innerText = timeString;
+    <div class="board" id="bus-board">
+        <h2 class="bus-title">🚌 Live Buses (Coronation Park)</h2>
+        <div id="bus-list" class="loading">Loading departures...</div>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURATION ---
+    // Get your free API keys at https://developer.transportapi.com/
+    const APP_ID = 'YOUR_APP_ID_HERE';
+    const APP_KEY = 'YOUR_APP_KEY_HERE';
+    const USE_REAL_API = false; // Change to true once you have API keys
+
+    // Station/Stop Codes for Port Glasgow
+    const TRAIN_STATION_CODE = 'PTG'; // Port Glasgow rail station
+    const BUS_STOP_ATCO = '61501625'; // Example ATCO code for a central Port Glasgow bus stop
+
+    // --- CLOCK ---
+    function updateClock() {
+        document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- DATA FETCHING & RENDERING ---
+    async function fetchDepartures() {
+        if (USE_REAL_API) {
+            try {
+                // Fetch Trains
+                const trainRes = await fetch(`https://transportapi.com/v3/uk/train/station/${TRAIN_STATION_CODE}/live.json?app_id=${APP_ID}&app_key=${APP_KEY}`);
+                const trainData = await trainRes.json();
+                renderDepartures('train-list', parseTrainData(trainData));
+
+                // Fetch Buses
+                const busRes = await fetch(`https://transportapi.com/v3/uk/bus/stop/${BUS_STOP_ATCO}/live.json?app_id=${APP_ID}&app_key=${APP_KEY}`);
+                const busData = await busRes.json();
+                renderDepartures('bus-list', parseBusData(busData));
+            } catch (error) {
+                document.getElementById('train-list').innerHTML = `<div class="loading status-delayed">Error fetching data. Check console.</div>`;
+                console.error("API Error:", error);
+            }
+        } else {
+            // Load Demo Data
+            renderDepartures('train-list', getDemoTrainData());
+            renderDepartures('bus-list', getDemoBusData());
         }
-        updateClock();
-        setInterval(updateClock, 1000);
-    </script>
-</body>
-</html>
+    }
+
+    function renderDepartures(elementId, departures) {
+        const container = document.getElementById(elementId);
+        if (departures.length === 0) {
+            container.innerHTML = '<div class="loading">No upcoming departures found.</div>';
+            return;
+        }
+
+        container.innerHTML = departures.map(dep => `
+            <div class="departure-item">
+                <div class="dep-time">${dep.time}</div>
+                <div class="dep-destination">${dep.destination}</div>
+                <div class="dep-status ${getStatusClass(dep.status)}">${dep.status}</div>
+            </div>
+        `).join('');
+    }
+
+    function getStatusClass(status) {
+        const s = status.toLowerCase();
+        if (s === 'on time') return 'status-on-time';
+        if (s.includes('late') || s.includes('cancelled')) return 'status-delayed';
+        return 'status-expected';
+    }
+
+    // --- API PARSERS ---
+    function parseTrainData(data) {
+        if (!data.departures || !data.departures.all) return [];
+        return data.departures.all.slice(0, 5).map(train
